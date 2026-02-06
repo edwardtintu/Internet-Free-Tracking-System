@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TARP PROJECT</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  <!-- Google Maps integration via Leaflet -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBYiIUQWSISM8FMMm2N6jWEAfFIKzuT6Vk"></script>
+  <script src="https://unpkg.com/leaflet.gridlayer.googlemutant@latest/dist/Leaflet.GoogleMutant.js"></script>
+</head>
+<body>
+  <div id="beacon" class="beacon hidden">🚨 EMERGENCY MODE</div>
+  <div id="rescueMode" class="overlay hidden">
+    🚨 RESCUE MODE ENABLED 🚨
+  </div>
+
+  <div id="app">
+    <h1 class="page-title">
+      🌐 Internet-Free LoRa Based Rescue System
+      <button id="logoutBtn" style="float:right;margin-top:6px;padding:6px 10px;border-radius:6px;background:#ff5252;border:none;color:#fff;cursor:pointer">Logout</button>
+    </h1>
+
+    <div class="left">
+      <div class="map-container card">
+        <div id="map"></div>
+        <button id="lockBtn" class="lock-btn">🔓 Auto-Focus ON</button>
+        <div id="minimap" class="mini-map"></div>
+      </div>
+
+      <!-- System Details below the map -->
+      <div class="card">
+        <div class="title">📡 Live Tracker</div>
+        <div class="stat-grid" style="margin-top:12px">
+          <div class="stat">
+            <h3>Latitude</h3>
+            <p id="lat">--</p>
+          </div>
+          <div class="stat">
+            <h3>Longitude</h3>
+            <p id="lon">--</p>
+          </div>
+          <div class="stat">
+            <h3>Altitude (m)</h3>
+            <p id="alt">--</p>
+          </div>
+          <div class="stat">
+            <h3>Speed (km/h)</h3>
+            <p id="spd">--</p>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" id="statusRow">
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="badge" id="batteryBadge">BAT: -- V</div>
+            <div style="color:var(--muted);margin-left:6px" id="lastSeen">Last: --</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="statusCard">
+        <div class="title">📟 Device Status</div>
+        <div class="status-row">
+          <div class="s-item"><b>LoRa:</b> <span id="loraStatus">✅ Active</span></div>
+          <div class="s-item"><b>GPS:</b> <span id="gpsStatus">--</span></div>
+          <div class="s-item"><b>Battery:</b> <span id="batteryStatus">--</span></div>
+          <div class="s-item"><b>Signal:</b> <span id="signalIcon">📶</span></div>
+        </div>
+      </div>
+
+      <div class="card" id="receiverCard">
+        <div class="title">📡 Receiver Status</div>
+        <div class="status-row">
+          <div class="s-item"><b>Status:</b> <span id="receiverOnline">⏳ Checking...</span></div>
+          <div class="s-item"><b>Location:</b> <span id="receiverLocation">--</span></div>
+          <div class="s-item"><b>Last Seen:</b> <span id="receiverLastSeen">--</span></div>
+          <div class="s-item"><b>Signal:</b> <span id="receiverSignal">--</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="title">Battery Voltage</div>
+        <div id="batteryChartWrap"><canvas id="batteryChart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="title">Signal (RSSI)</div>
+        <div id="chartWrap"><canvas id="rssiChart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="title">Packet Logs</div>
+        <div id="logs"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

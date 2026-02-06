@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login — Base Station</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="logo">
+        <h1 style="margin:0;font-size:32px;color:#2196F3">🌐</h1>
+      </div>
+      <h2>Command Center Login</h2>
+      <p class="subtitle">Enter your credentials to access the system</p>
+      
+      <div class="input-group">
+        <label for="username">Username</label>
+        <input 
+          id="username" 
+          type="text" 
+          placeholder="Enter your username"
+          autocomplete="username"
+        />
+      </div>
+      
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input 
+          id="password" 
+          type="password" 
+          placeholder="Enter your password"
+          autocomplete="current-password"
+        />
+      </div>
+      
+      <button class="btn" id="loginBtn">
+        Sign In to Dashboard
+      </button>
+      
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+
+<script>
+// Handle login function
+async function handleLogin() {
+  const btn = document.getElementById('loginBtn');
+  const msg = document.getElementById('msg');
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value;
+  
+  // Simple validation
+  if (!u || !p) {
+    msg.innerText = "Please enter both username and password";
+    return;
+  }
+  
+  try {
+    // Show loading state
+    btn.disabled = true;
+    btn.innerText = "Signing in...";
+    msg.innerText = "";
+    
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: u, password: p})
+    });
+    
+    const j = await res.json();
+    if (j.success) {
+      msg.style.color = '#4caf50';
+      msg.innerText = "Login successful!";
+      window.location.href = '/';
+    } else {
+      msg.innerText = j.message || "Invalid username or password";
+      btn.disabled = false;
+      btn.innerText = "Sign In to Dashboard";
+    }
+  } catch (err) {
+    msg.innerText = "Connection error. Please try again.";
+    btn.disabled = false;
+    btn.innerText = "Sign In to Dashboard";
+  }
+}
+
+// Click handler
+document.getElementById('loginBtn').onclick = handleLogin;
+
+// Enter key handler
+document.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    handleLogin();
+  }
+});
+
+// Focus username input on load
+document.getElementById('username').focus();
+</script>
+</body>
+</html>

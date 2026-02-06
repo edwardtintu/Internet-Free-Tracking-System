@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>IoT Transmission Monitor - Live Dashboard</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  
+  <!-- Dashboard Styles -->
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <!-- Data Source Toggle -->
+  <div class="data-source-toggle" id="dataSourceToggle">
+    <button class="source-btn active" data-source="simulated">🔄 Simulated</button>
+    <button class="source-btn" data-source="hardware">📡 Hardware</button>
+  </div>
+
+  <!-- Theme Toggle -->
+  <div class="theme-toggle" id="themeToggle" title="Toggle Theme">
+    <svg class="theme-icon" viewBox="0 0 24 24">
+      <path class="sun" d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>
+      <path class="moon" d="M9 2c-1.05 0-2.05.16-3 .46 4.06 1.27 7 5.06 7 9.54 0 4.48-2.94 8.27-7 9.54.95.3 1.95.46 3 .46 5.52 0 10-4.48 10-10S14.52 2 9 2z"/>
+    </svg>
+  </div>
+
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-left">
+      <h1>🌐 IoT Transmission Monitor</h1>
+      <div class="connection-status" id="connectionStatus">
+        <span class="status-dot"></span>
+        <span class="status-text">Checking connection...</span>
+      </div>
+    </div>
+    <button id="logoutBtn" class="btn-logout">Logout</button>
+  </header>
+
+  <!-- Main Dashboard -->
+  <div class="dashboard-container">
+    
+    <!-- Left Panel: Map -->
+    <div class="map-section">
+      <div class="map-container" id="mapContainer"></div>
+      
+      <!-- Map Controls -->
+      <div class="map-controls">
+        <button class="map-btn" id="centerMap" title="Center Map">📍</button>
+        <button class="map-btn" id="toggleTracking" title="Auto-track">🎯</button>
+      </div>
+
+      <!-- Location Cards on Map -->
+      <div class="location-card" id="transmitterCard">
+        <div class="card-title">📡 Transmitter</div>
+        <div class="card-location" id="txLocation">--</div>
+      </div>
+      
+      <div class="location-card receiver-card" id="receiverCard">
+        <div class="card-title">🖥️ Base Station</div>
+        <div class="card-location">VIT Vellore, SJT</div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Stats & Graphs -->
+    <div class="stats-section">
+      
+      <!-- Connection Mode Banner -->
+      <div class="mode-banner" id="modeBanner">
+        <span class="mode-icon">🔄</span>
+        <span class="mode-text" id="modeText">Simulated Mode</span>
+      </div>
+
+      <!-- Key Metrics Grid -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Data Rate</div>
+          <div class="metric-value" id="dataRate">0</div>
+          <div class="metric-unit">packets/min</div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-label">Latency</div>
+          <div class="metric-value" id="latency">0</div>
+          <div class="metric-unit">ms</div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-label">Packet Loss</div>
+          <div class="metric-value" id="packetLoss">0</div>
+          <div class="metric-unit">%</div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-label">Signal</div>
+          <div class="metric-value" id="signalStrength">--</div>
+          <div class="metric-unit">dBm</div>
+        </div>
+      </div>
+
+      <!-- Live Data Charts -->
+      <div class="chart-card">
+        <div class="chart-header">Signal Strength (RSSI)</div>
+        <canvas id="rssiChart"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">Battery Voltage</div>
+        <canvas id="batteryChart"></canvas>
+      </div>
+
+      <!-- Telemetry Data -->
+      <div class="telemetry-card">
+        <div class="telemetry-header">📊 Live Telemetry</div>
+        <div class="telemetry-grid">
+          <div class="telem-item">
+            <span class="telem-label">Satellites:</span>
+            <span class="telem-value" id="satellites">--</span>
+          </div>
+          <div class="telem-item">
+            <span class="telem-label">Altitude:</span>
+            <span class="telem-value" id="altitude">--</span>
+          </div>
+          <div class="telem-item">
+            <span class="telem-label">Speed:</span>
+            <span class="telem-value" id="speed">--</span>
+          </div>
+          <div class="telem-item">
+            <span class="telem-label">Battery:</span>
+            <span class="telem-value" id="battery">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Logs -->
+      <div class="logs-card">
+        <div class="logs-header">📋 System Logs</div>
+        <div class="logs-content" id="logs"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast" id="toast">
+    <span class="toast-icon"></span>
+    <span class="toast-message"></span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

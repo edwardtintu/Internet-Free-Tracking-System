@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Button Test</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #1a1a1a; color: #fff; }
+    button { padding: 15px; margin: 10px; font-size: 16px; cursor: pointer; }
+    .result { margin: 20px 0; padding: 10px; background: #333; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Button Click Test</h1>
+  
+  <button id="test1" onclick="testClick(1)">Test Button 1 (inline)</button>
+  <button id="test2">Test Button 2 (onclick property)</button>
+  <button id="test3">Test Button 3 (addEventListener)</button>
+  
+  <div id="results" class="result"></div>
+
+  <script>
+    function testClick(num) {
+      document.getElementById('results').innerHTML += `<p>✅ Button ${num} clicked!</p>`;
+    }
+
+    // Test onclick property
+    document.getElementById('test2').onclick = function() {
+      testClick(2);
+    };
+
+    // Test addEventListener
+    document.getElementById('test3').addEventListener('click', function() {
+      testClick(3);
+    });
+
+    console.log('Test page loaded');
+  </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+#include <SoftwareSerial.h>
+#include <TinyGPS++.h>
+#include <SPI.h>
+#include <LoRa.h>
+
+// ----------------------------------------
+// GPS: NEO-6M
+// GPS TX → ESP8266 D1 (GPIO5)
+// ----------------------------------------
+SoftwareSerial gpsSerial(2, 5); 
+// RX = 5 (D1), TX = 4 (D2) — we only use RX on ESP, TX unused
+
+TinyGPSPlus gps;
+
+// ----------------------------------------
+// LoRa SX1278 wiring
+// ----------------------------------------
+// SCK  → D5 (GPIO14)
+// MISO → D6 (GPIO12)
+// MOSI → D7 (GPIO13)
+// NSS  → D8 (GPIO15)
+// RST  → D0 (GPIO16)
+// DIO0 → D2 (GPIO4)
+
+#define LORA_SS   D8
+#define LORA_RST  D0
+#define LORA_DIO0 D2
+
+// Frequency for SX1278 (433 MHz band)
+#define LORA_FREQ 433E6
+
+// ----------------------------------------
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+  Serial.println("🚀 Transmitter Starting...");
+
+  // GPS start
+  gpsSerial.begin(9600);
+  Serial.println("📡 GPS Started...");
+
+  // LoRa start
+  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);
+
+  if (!LoRa.begin(LORA_FREQ)) {
+    Serial.println("❌ LoRa init failed. Check wiring!");
+    while (1);
+  }
+
+  Serial.println("✅ LoRa transmitter ready.");
+}
+
+void loop() {
+  // READ GPS DATA
+  while (gpsSerial.available()) {
+    gps.encode(gpsSerial.read());
+  }
+
+  if (gps.location.isUpdated()) {
+    
+    float lat = gps.location.lat();
+    float lon = gps.location.lng();
+    float alt = gps.altitude.meters();
+    int sats = gps.satellites.value();
+    float spd = gps.speed.kmph();
+    
+    // Simulated battery value (replace later if needed)
+    float battery = 3.72;  
+
+    // -------------------------
+    // TRANSMIT VIA LORA
+    // -------------------------
+    String packet = 
+      "LAT:" + String(lat, 6) +
+      ",LON:" + String(lon, 6) +
+      ",ALT:" + String(alt, 1) +
+      ",SPD:" + String(spd, 2) +
+      ",SAT:" + String(sats) +
+      ",BAT:" + String(battery, 2);
+
+    Serial.print("📤 Sending: ");
+    Serial.println(packet);
+
+    LoRa.beginPacket();
+    LoRa.print(packet);
+    LoRa.endPacket();
+
+  } else {
+    Serial.println("⏳ Waiting for GPS fix...");
+  }
+
+  delay(2500);
+}
