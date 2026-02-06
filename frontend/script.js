@@ -10,10 +10,10 @@ let batteryData = [], batteryLabels = [];
 // Fallback: VIT Vellore SJT location (adjust if needed)
 const SJT = { lat: 12.9692, lon: 79.1559 };
 
-// Map configuration - Set GOOGLE_MAPS_API_KEY to enable Google Maps
-// Leave empty to use OpenStreetMap (default)
-const GOOGLE_MAPS_API_KEY = 'AIzaSyBYiIUQWSISM8FMMm2N6jWEAfFIKzuT6Vk';
-const USE_GOOGLE_MAPS = GOOGLE_MAPS_API_KEY.length > 0;
+// Map configuration - Google Maps API key loaded from backend
+// Falls back to OpenStreetMap if no key is provided
+const GOOGLE_MAPS_API_KEY = ''; // Will be populated by backend template - DO NOT COMMIT REAL KEY HERE
+const USE_GOOGLE_MAPS = GOOGLE_MAPS_API_KEY && GOOGLE_MAPS_API_KEY.length > 0;
 
 // Receiver tracking
 const RECEIVER_TIMEOUT = 15000; // 15 seconds

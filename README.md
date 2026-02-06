@@ -106,6 +106,7 @@ cd TARP
 ```bash
 cd backend
 pip install -r requirements.txt
+cp ../.env.example ../.env  # Copy example environment file
 python create_admin.py  # Creates admin user
 python main.py          # Starts the server
 ```
@@ -153,9 +154,13 @@ Default credentials:
 ## 🔧 Configuration Options
 
 ### Environment Variables
+Create a `.env` file in the project root to configure the application:
+
+- `GOOGLE_MAPS_API_KEY`: Google Maps API key (optional, leave empty to use OpenStreetMap)
 - `ALLOWED_ORIGINS`: Comma-separated list of allowed origins for CORS
 - `SERIAL_ENABLED`: Enable/disable serial communication mode
 - `SERIAL_PORT`: Serial port for direct connection (if not using WiFi)
+- `SERIAL_BAUD`: Baud rate for serial communication
 
 ### LoRa Parameters
 The system uses these LoRa settings for reliable communication:
@@ -189,7 +194,12 @@ For detailed troubleshooting, refer to `TROUBLESHOOTING.md`.
 - Restrict `ALLOWED_ORIGINS` in production environments
 - Use HTTPS in production deployments
 - Secure WiFi credentials in receiver code
+- Never hardcode API keys in client-side code - use environment variables
 - Consider adding API key authentication for data upload endpoint
+- Store sensitive configuration in environment variables
+- Use .gitignore to prevent accidental commits of sensitive files
+- API keys are loaded securely from environment variables using python-dotenv
+- Google Maps API key (if used) is injected server-side to prevent exposure
 
 ## 🤝 Contributing
 

@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.env
+.env
+
+# Database
+*.sqlite
+*.db
+
+# Node / frontend
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Configuration files that might contain sensitive data
+config.json
+*.config
+*.ini
+*.key
+*.pem
+*.crt
+secret*
+credentials*
+private*

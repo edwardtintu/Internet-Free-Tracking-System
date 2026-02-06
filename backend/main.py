@@ -6,6 +6,13 @@ import random
 import math
 import os
 
+# Load environment variables
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv is optional
+
 # local modules
 from db import init_db, save_packet, get_latest, create_user, verify_user, get_user_by_id, save_receiver_status, get_last_receiver_status
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
@@ -348,7 +355,7 @@ def dashboard():
 @app.route('/old')
 @login_required
 def old_dashboard():
-    return send_from_directory(app.static_folder, 'index.html')
+    return index_with_api_key()
 
 @app.route('/<path:path>')
 def static_proxy(path):
@@ -357,6 +364,65 @@ def static_proxy(path):
         return send_from_directory(app.static_folder, path)
 
     return send_from_directory(app.static_folder, path)
+
+
+@app.route('/index.html')
+@login_required
+def index_with_api_key():
+    """Serve index.html with Google Maps API key injected from environment"""
+    import os
+    from flask import render_template_string
+    
+    google_maps_api_key = os.getenv('GOOGLE_MAPS_API_KEY', '')
+    
+    # Read the index.html file
+    index_path = os.path.join(app.static_folder, 'index.html')
+    with open(index_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    # Inject the API key if it exists
+    if google_maps_api_key:
+        # Replace the API key in the Google Maps script tag
+        content = content.replace(
+            'key=GOOGLE_MAPS_API_KEY_PLACEHOLDER',
+            f'key={google_maps_api_key}'
+        )
+    else:
+        # If no API key, remove the Google Maps script entirely to avoid errors
+        content_lines = content.split('\n')
+        filtered_lines = []
+        for line in content_lines:
+            if 'maps.googleapis.com/maps/api/js' in line:
+                # Skip this line to avoid exposing the API key
+                continue
+            else:
+                filtered_lines.append(line)
+        content = '\n'.join(filtered_lines)
+    
+    return content
+
+
+@app.route('/script.js')
+@login_required
+def script_with_api_key():
+    """Serve script.js with Google Maps API key injected from environment"""
+    import os
+    
+    google_maps_api_key = os.getenv('GOOGLE_MAPS_API_KEY', '')
+    
+    # Read the script.js file
+    script_path = os.path.join(app.static_folder, 'script.js')
+    with open(script_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    # Replace the API key placeholder with the actual key from environment
+    content = content.replace(
+        "const GOOGLE_MAPS_API_KEY = ''; // Will be populated by backend template - DO NOT COMMIT REAL KEY HERE",
+        f"const GOOGLE_MAPS_API_KEY = '{google_maps_api_key}'; // Loaded from environment"
+    )
+    
+    from flask import Response
+    return Response(content, mimetype='application/javascript')
 
 # -------------------------------------------------------------------
 if __name__ == "__main__":
